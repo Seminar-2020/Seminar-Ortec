@@ -1,2 +1,2 @@
 # Seminar-Ortec
-Codes 
+Codes for the seminar case studies at Ortec Finance
