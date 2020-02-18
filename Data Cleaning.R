@@ -1,4 +1,5 @@
 library(dplyr)
+library(readr)
 #### DATA ####
 # make sure to load Ortec's latest data-set, should be 1091799 observations
 dataset <- read_delim("dataset.csv", "|", escape_double = FALSE, trim_ws = TRUE)
@@ -46,11 +47,29 @@ DF  <- DF %>%
   filter(AGE<=216) %>% # house cannot be built more than 216 years ago
   filter(WONINGID!=3421281) # aberrant observation, not truly "VRIJSTAAND"
 
+dates <- as.data.frame(seq(as.Date("2010-01-01"), as.Date("2018-12-31"), by = "days"))
+datescount <- seq(1:nrow(dates))
+dates <- cbind(dates, datescount/365) #normalize by dividing through # days/year)
+names(dates) = c("DATUM", "datescount")
+#create right Date format in all our dataframes
+DF$DATUM <- lubridate::dmy(DF$DATUM)
+DF <- merge(DF, dates, by="DATUM")
+
 # Select variables to be used 
-DF.use <- dplyr::select(DF, "WAARDE","WONINGTYPEID","KAVOPP","WONINGOPP","WONINGINH","GARAGE","BERGING","MONUMENT","BUURTCODE")
+DF.use <- dplyr::select(DF, "WAARDE","WONINGTYPEID","KAVOPP","WONINGOPP","WONINGINH","GARAGE","BERGING","MONUMENT","datescount","AGE","BUURTCODE")
 
 #### Create numerical DF based on cleaned data ####
-# create data frame with only numerical variables (fastDummies)
 DF.dum <- fastDummies::dummy_cols(DF.use, remove_first_dummy = F,remove_selected_columns = T)
 DF.dum$WAARDE <- log(DF.dum$WAARDE)
 
+# split data frame based on appartments or not
+DF.dum.ap <- filter(DF.dum, WONINGTYPEID_STAPEL == "1")
+DF.dum.nap <- filter(DF.dum, WONINGTYPEID_STAPEL != "1")
+
+# create train & test samples (for appartments and non-appartments)
+DF.dum.ap.train <- DF.dum.ap[1:18704,] #all appartments sold before 18
+DF.dum.ap.test <- DF.dum.ap[18705:21266,] #all appartment sold in 18
+DF.dum.nap.train <- DF.dum.nap[1:7608,] #all houses sold before 18
+DF.dum.nap.test <- DF.dum.nap[7609:8756,] #all houses sold in 18
+
+# PAY ATTENTION WHICH VARIABLES TO SELECT FOR WHICH TYPE OF MODEL, DF's still contain all variables
