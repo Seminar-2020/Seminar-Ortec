@@ -1,47 +1,98 @@
-### PACKAGES ####  #zonder H20
+### PACKAGES #### 
 library(randomForest)
 library(MLmetrics)
 library(ggplot2)
 library(xgboost)
 library(gbm)
 library(neuralnet)
+library(caret) #CV
+library(lattice)
+library (ggplot2)
+library(e1071)
+library(ranger)
+#h20
+library(h2o)
+localH2O = h2o.init()
+#DNN
+library(keras)
 
-#RANDOM FOREST
+#RANDOM FOREST 
+# BUNK 
+# use data DF.dum.ap.train to train the random forest
+# use data DF.dum.ap.test to test the random forest
 # use function randomForest() from package "randomForest"
-# RF on the full data set 
-test_RF <- randomForest(WAARDE~.,data=train80, ntree = 100, importance = T, do.trace = T) #mtry = p/3
-pred_RF <- predict(test_RF, train20[-1])
-MAPE(train20$WAARDE,pred_RF) # 0.01357624
+# randomForest: Random forest algorithm for classification and regression 
+# ntree: number of trees to grow
+# mtry : number or variables randomly sampled as candidates at each split
+# nodesize: minimume size of the terminal nodes, large nodesize will lead to smaller trees, default 
+# for regression is 5
 
-#Variable importance plots 
-varimp_RF <- importance(test_RF)
-varImportance_RF <- data.frame(Variables = row.names(varimp_RF), 
-                               Importance = round(varimp_RF[,'%IncMSE'],2)) 
-rankImportance <- varImportance_RF %>% mutate(Rank = paste0('#',dense_rank(desc(Importance))))
-print("Variable importance after second iteration") # why second iteration?
-ggplot(rankImportance, aes(x = reorder(Variables, Importance), 
-                           y = Importance, fill = Importance)) +
-  geom_bar(stat='identity') + 
-  geom_text(aes(x = Variables, y = 0.5, label = Rank),
-            hjust=0, vjust=0.55, size = 4, colour = 'red') +
-  labs(x = 'Variables') +
-  coord_flip() 
+RF_bunk <- randomForest(WAARDE~.,data=DF.dum.ap.train, nodesize = 5, ntree = 20) 
 
-#### Gradient Boosting ####
-# use function xgboost() from packages "xgboost" NOG TESTEN
+MAPE(train20$WAARDE,pred_RF) 
+
+# TrainControl: used to apply cross-validation to tune the parameters, mtry, ntrees, 
+# number: number of resampling iterations
+# Train: sets up a grid of tuning parametes for regression routines, fit each model and calculates
+# a resampling based performance measure
+# tuneGrid:
+
+#RF -R 
+ptm <- proc.time()
+
+control <- trainControl(method='cv', 
+                        number=5, search="random")
+train(WAARDE~.,
+      data=DF.dum.ap.train,
+      method = "rf",
+      ntee = 5,
+      trControl = control)
+print(proc.time() - ptm) 
+
+#tunegrid <- expand.grid(.mtry=c(1:15))
+
+
+#RF - h20
+h2o.init(nthreads = 20, max_mem_size = "16g")
+test <- as.h2o(DF.dum.ap.test)
+train <- as.h2o(DF.dum.ap.train)
+
+#RF parameters 
+rf_param <- list(learn_rate = c(0.01, 0.1),
+                    max_depth = c(3, 5, 9),
+                    sample_rate = c(0.8, 1.0),
+                    col_sample_rate = c(0.2, 0.5, 1.0))
+
+
+default_rf <- h2o.randomForest(x = 2:24 , y = 1, 
+                               training_frame = train, 
+                               valdidation_fram test,
+                               stopping_rounds = 5, 
+                               stopping_tolerance = 0.001, 
+                               stopping_metric = "MAE", 
+                               mtries = 7,
+                               seed = 29,
+                               nfolds = 10)
+
+
+#### Gradient Boosting Machines  ####
+# use function xgboost() from packages "xgboost"
 # eta - learning rate
 # max_depth 
 # objective - reg:squarederror
 # data - training should be of class xgb.DMatrix 
-
 # use function gbm() from package "gbm"
 # distribution = "gaussian" (squared error)
 # bag.fraction = 1 --> gebruik alle observaties in de sample
+
 test_GB <- gbm(WAARDE ~ ., distribution = "gaussian", data = train80, n.trees = 100,
                interaction.depth = 1, n.minobsinnode = 0, shrinkage = 0.1, bag.fraction = 1, verbose=T)
 pred_GB <- predict(test_GB, train20[-1], n.trees = 100)
 MAPE(train20$WAARDE,pred_GB) # 0.01450087 / 0.01449252 (bag frac. = 0.5 or bag frac = 1)
 summary(test_GB) # gives relative importance (in values + plot)
+
+# GMB - H20 
+
 
 #### Neural Network ####
 # exclude can be used to prevent using bias neurons: https://stackoverflow.com/questions/40633567/how-to-exclude-bias-neurons-in-neuralnet-in-r
