@@ -81,15 +81,14 @@ shapley.values <- function(W,Z,v) {
 #
 # v         vector of contributions v(S) for every subset
 
-func <- function (M, x.star, X, K, fit.model) {
-  Z <- matrix.Z(M)
+func.v <- function (M, x.star, X, K, fit.model, Z) {
   z <- Z[,-1] 
   x.star.list <- replicate(nrow(z),x.star)
   x.star.matrix <- matrix(unlist(x.star.list), ncol = M, byrow = TRUE)
   x.star.S <- z*x.star.matrix #x*_S for all possible subsets S
   
   prediction <- replicate(K, {
-    x.random.df <- X[sample(nrow(X),size=2^M,replace=FALSE),] #sample random instance for every subset S from original X data
+    x.random.df <- X[sample(nrow(X),size=2^M,replace=TRUE),] #sample random instance for every subset S from original X data
     x.random.matrix <- as.matrix(x.random.df)
     x.new <- matrix(NA, nrow = nrow(x.random.matrix), ncol = M) #initialise new matrix
     
