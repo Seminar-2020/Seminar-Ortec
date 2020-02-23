@@ -27,6 +27,10 @@ DF.dum.ap.train<- DF.dum.ap.train_2[,-c(2,10,11,12,13,24)]
 #h2o
 test.ap <- as.h2o(DF.dum.ap.testx)
 train.ap <- as.h2o(DF.dum.ap.train)
+list(strategy = "RandomDiscrete", 
+     stopping_metric = "mae", 
+     stopping_tolerance = 0.0005, stopping_rounds = 5)
+
 
 RF_params <- list(
   mtries = seq(3,10),
@@ -43,8 +47,14 @@ rf_grid <- h2o.grid(algorithm = "randomForest",
                     nfolds = 5,                           
                     hyper_params = RF_params,
                     search_criteria = search_criteria
-                    
-)
+                    )
+aml <- h2o.automl(      x = c("datescount","WONINGOPP","GARAGE","AGE"
+                              ,"BERGING",  "MONUMENT", "BUURTCODE_08",
+                              "BUURTCODE_14","BUURTCODE_06" , "BUURTCODE_05" ,
+                              "BUURTCODE_12" , "BUURTCODE_15", "BUURTCODE_01") , y = 1 , 
+                        training_frame = train.ap,
+                  max_models = 20,
+                  seed = 1)
 h2o.getGrid("rf_grid", decreasing = F)
 rf_model <- h2o.getModel(grid@model_ids[[1]])
 predictions_rf <- h2o.predict(rf_model, test.ap[,-1])
@@ -56,7 +66,7 @@ RF_app <- randomForest(WAARDE~datescount+WONINGOPP + GARAGE + AGE+
                          BUURTCODE_01 
                        ,DF.dum.ap.train_2,
                        mtry=4, 
-                       ntree = 150)
+                       ntree = 200)
 
 
 #Evaluations
@@ -105,7 +115,7 @@ RF_non_app <- randomForest(WAARDE ~datescount+WONINGOPP + GARAGE  +
                              BUURTCODE_06 + BUURTCODE_05 + BUURTCODE_12 + BUURTCODE_15 + KAVOPP 
                             ,DF.dum.nap.train_2,
                             mtry=6, 
-                            ntree = 150)
+                            ntree = 200)
 
 #Evaluations
 predictions_rf <-predict(RF_non_app, DF.dum.nap.testx[,-1])
