@@ -2,7 +2,7 @@ library(dplyr)
 library(readr)
 #### DATA ####
 # make sure to load Ortec's latest data-set, should be 1091799 observations
-dataset <- read_delim("dataset.csv", "|", escape_double = FALSE, trim_ws = TRUE)
+dataset <- read_delim("dataset copy.csv", "|", escape_double = FALSE, trim_ws = TRUE)
 ## Filter  out outlying observations
 DF <- dataset
 DF <- DF %>% filter(PC_N %in% (3000:3089)) #Rotterdam
@@ -69,7 +69,40 @@ DF.dum.nap <- filter(DF.dum, WONINGTYPEID_STAPEL != "1")
 # create train & test samples (for appartments and non-appartments)
 DF.dum.ap.train <- DF.dum.ap[1:18704,] #all appartments sold before 18
 DF.dum.ap.test <- DF.dum.ap[18705:21266,] #all appartment sold in 18
+
 DF.dum.nap.train <- DF.dum.nap[1:7608,] #all houses sold before 18
-DF.dum.nap.test <- DF.dum.nap[7609:8756,] #all houses sold in 18
+DF.dum.nap.test <- DF.dum.nap[7609:8756,] #all houses sold in 18 
 
 # PAY ATTENTION WHICH VARIABLES TO SELECT FOR WHICH TYPE OF MODEL, DF's still contain all variables
+# Tiemen variabele selection split vanaf hier  
+# appartments
+length_ap = dim(DF.dum.ap.train)[1]/2 #split training sample half-half
+set.seed(12346)#DONOTCHANGESEED
+sample_ap = c(sample(nrow(DF.dum.ap.train), length_ap, replace = FALSE))
+DF.dum.ap.train_1 = DF.dum.ap.train[sample_ap, ]
+DF.dum.ap.train_2 = DF.dum.ap.train[-sample_ap,]
+DF.dum.ap.test <- DF.dum.ap[18705:21266,] #all appartment sold in 18
+
+# non-appartments
+length_nap = dim(DF.dum.nap.train)[1]/2 #split training sample half-half 
+set.seed(12345)#DONOTCHANGESEED
+sample_nap = c(sample(nrow(DF.dum.nap.train), length_nap, replace = FALSE))
+DF.dum.nap.train_1 = DF.dum.nap.train[sample_nap, ]
+DF.dum.nap.train_2 = DF.dum.nap.train[-sample_nap,] # use
+DF.dum.nap.test <- DF.dum.nap[7609:8756,] #all houses sold in 18
+DF.dum.nap.train <- DF.dum.nap[1:7608,] #all houses sold before 18
+
+
+
+# Final linear model Appartments  DF.dum.ap.train_2
+lm_ap_fin = lm(WAARDE ~ datescount+WONINGOPP+I(WONINGOPP^2) + GARAGE + BERGING + MONUMENT + AGE+ I(AGE^2)+ BUURTCODE_08 + BUURTCODE_14 + BUURTCODE_06 + BUURTCODE_05 + BUURTCODE_12 + BUURTCODE_15 + BUURTCODE_01 , DF.dum.ap.train_2)
+
+# Final linear model non-AppartmentsDF.dum.nap.train_2
+lm_nap_final = lm(WAARDE ~ datescount+WONINGOPP +I(WONINGOPP^2) + GARAGE  + AGE+ I(AGE^2)+WONINGTYPEID_HALF + WONINGTYPEID_VRIJSTAAND+ BUURTCODE_04 + BUURTCODE_08 + BUURTCODE_06 + BUURTCODE_05 + BUURTCODE_12 + BUURTCODE_15 + KAVOPP + I(KAVOPP^2), DF.dum.nap.train_2)
+
+# Final selection of variables
+#WAARDE ~ datescount+WONINGOPP +I(WONINGOPP^2) + GARAGE  + AGE+ I(AGE^2)+WONINGTYPEID_HALF + WONINGTYPEID_VRIJSTAAND+ BUURTCODE_04 + BUURTCODE_08 + BUURTCODE_06 + BUURTCODE_05 + BUURTCODE_12 + BUURTCODE_15 + KAVOPP + I(KAVOPP^2), DF.dum.nap.train_2 )
+
+
+
+
