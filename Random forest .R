@@ -67,9 +67,9 @@ RF_app <- randomForest(WAARDE~datescount+WONINGOPP + GARAGE + AGE+
                        ,DF.dum.ap.train_2,
                        mtry=4, 
                        ntree = 200)
+varImpPlot(RF_app)
 
-
-#Evaluations
+#Evaluations out of sample 
 predictions_rf <-predict(RF_app, DF.dum.ap.testx[,-1])
 errors = abs(predictions_rf  - DF.dum.ap.testx[,1])
 mean(errors)
@@ -77,6 +77,16 @@ mape = 100 * (errors /  DF.dum.ap.testx[,1])
 accuracy = 100 - mean(mape)
 MAPE(predictions_rf,DF.dum.ap.testx[,1])
 MAE(predictions_rf,DF.dum.ap.testx[,1])
+mse(DF.dum.ap.testx[,1],predictions_rf)
+
+#Evaluations in sample 
+predictions_rf_in<-predict(RF_app, DF.dum.ap.train[,-1])
+errors = abs(predictions_rf_in  - DF.dum.ap.train[,1])
+mean(errors)
+mape = 100 * (errors /  DF.dum.ap.train[,1])
+accuracy = 100 - mean(mape)
+MAPE(predictions_rf_in,DF.dum.ap.train[,1])
+MAE(predictions_rf_in,DF.dum.ap.train[,1])
 mse(DF.dum.ap.testx[,1],predictions_rf)
 
 # Random forest non- appartments
@@ -114,8 +124,9 @@ RF_non_app <- randomForest(WAARDE ~datescount+WONINGOPP + GARAGE  +
                              BUURTCODE_08 +
                              BUURTCODE_06 + BUURTCODE_05 + BUURTCODE_12 + BUURTCODE_15 + KAVOPP 
                             ,DF.dum.nap.train_2,
-                            mtry=6, 
+                            mtry=3, 
                             ntree = 200)
+varImpPlot(RF_non_app)
 
 #Evaluations
 predictions_rf <-predict(RF_non_app, DF.dum.nap.testx[,-1])
@@ -123,8 +134,10 @@ errors = abs(predictions_rf  - DF.dum.nap.testx[,1])
 mean(errors)
 mape = 100 * (errors /  DF.dum.nap.testx[,1])
 accuracy = 100 - mean(mape)
-MAPE(predictions_rf,DF.dum.nap.testx[,1])
-MAE(predictions_rf,DF.dum.nap.testx[,1])
+#in sample
+predictions_rf <-predict(RF_non_app, DF.dum.nap.train[,-1])
+MAPE(predictions_rf,DF.dum.nap.train[,1])
+MAE(predictions_rf,DF.dum.nap.train[,1])
 mse(DF.dum.nap.testx[,1],predictions_rf)
 
   
