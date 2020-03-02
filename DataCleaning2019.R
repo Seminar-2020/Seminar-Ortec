@@ -55,11 +55,10 @@ DF.use <- dplyr::select(DF,"WONINGTYPEID","KAVOPP","WONINGOPP","WONINGINH","GARA
 DF.dum <- fastDummies::dummy_cols(DF.use, remove_first_dummy = F,remove_selected_columns = T)
 
 # before splitting the data, add column with 0 non-bunk, 1 bunk
+# and add index number to retrieve the predictions
 DF.dum$DUM_STAPEL <- ifelse(DF.dum$WONINGTYPEID_STAPEL == "1", 1, 0)
+DF.dum$INDEX <- 1:nrow(DF.dum)
 
 # split data frame based on appartments or not
 DF.dum.ap <- filter(DF.dum, WONINGTYPEID_STAPEL == "1")
 DF.dum.nap <- filter(DF.dum, WONINGTYPEID_STAPEL != "1")
-
-
-
