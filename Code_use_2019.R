@@ -61,6 +61,48 @@ MAPE(pred_rf_1_in , DF.AP.Train[,1])
 MAE(pred_rf_1_in , DF.AP.Train[,1])
 mse( DF.AP.Train[,1],pred_rf_1_in )
 
+#### NON APPARTMENTS #### 
+# Remove the variables with only zeros or only 1's 
+# The dataset now contain log(Y) and the only  attributes used for appartments
+# 
+DF.NAP.Test<- DF.dum.nap.test[,-c(4,6,7,11,12,16,18,19,20,24)]
+DF.NAP.Train<- DF.dum.nap.train_2[,-c(4,6,7,11,12,16,18,19,20,24)]
+
+set.seed(1234)
+RF_non_app <- randomForest(log(WAARDE) ~datescount  + KAVOPP + WONINGOPP + GARAGE  + 
+                             AGE+ +WONINGTYPEID_HALF + WONINGTYPEID_VRIJSTAAND+ BUURTCODE_04 + 
+                             BUURTCODE_08 +
+                             BUURTCODE_06 + BUURTCODE_05 + BUURTCODE_12 + BUURTCODE_15 
+                           ,DF.dum.nap.train_2)
+
+
+# Global feature attribution
+varImpPlot(RF_non_app)
+#Evaluations out of sample 
+log.predictions_rf_NA <-predict(RF_non_app,DF.NAP.Test[,-1])
+# Transform the prediciton back to normal values
+pred_rf_NA <-  exp(log.predictions_rf_NA)
+results_1<- data.frame(actual =  DF.NAP.Test[,1], prediction = pred_rf_NA)
+head(results_1)
+
+# Metrics 
+errors = abs(pred_rf_NA - DF.NAP.Test[,1])
+mean(errors)
+median(errors)
+mape = 100 * (errors /   DF.NAP.Test[,1])
+accuracy = 100 - mean(mape)
+MAPE(pred_rf_NA,DF.NAP.Test[,1])
+
+# Evaluations in sample 
+# in-sample predictions
+log.predictions_rf_NA_in <-predict(RF_non_app,DF.NAP.Train[,-1])
+pred_rf_NA_in <-  exp(log.predictions_rf_NA_in)
+# Metrics
+errors = abs(pred_rf_NA_in- DF.NAP.Train[,1])
+mean(errors)
+median(errors)
+MAPE(pred_rf_NA_in , DF.NAP.Train[,1])
+
 #### GBM #### 
 library(xgboost)
 library(gbm)
@@ -110,3 +152,37 @@ errors = abs(pred_gbm_1_in  - DF.AP.Train[,1])
 mean(errors)
 mape = 100 * (errors /  DF.AP.Train[,1])
 accuracy = 100 - mean(mape)
+
+#### NON APPARTMENTS ####
+DF.NAP.Train.DATA <-as.matrix(DF.NAP.Train[,-1])
+DF.NAP.Test.DATA <- as.matrix(DF.NAP.Test[,-1])
+DF.NAP.Train.LABEL <-as.matrix(log(DF.NAP.Train[,1]))
+
+set.seed(1234)
+xxgboost_NA<- xgboost( data = DF.NAP.Train.DATA , label =DF.NAP.Train.LABEL, nrounds = 800
+)
+
+#Evaluations out of sample
+log.predict_1_NA = predict(xxgboost_NA, newdata = DF.NAP.Test.DATA)
+pred_gbm_NA <- exp(log.predict_1_NA )
+results_NA<- data.frame(actual =  DF.NAP.Test[,1], prediction = pred_gbm_NA)
+head(results_NA)
+
+MAPE(pred_gbm_NA, DF.NAP.Test[,1])
+errors = abs(pred_gbm_NA - DF.NAP.Test[,1])
+mean(errors)
+median(errors)
+mape = 100 * (errors /   DF.NAP.Test[,1])
+accuracy = 100 - mean(mape)
+
+# Evaluationsin sample in 
+log.predict_Na_in= predict(xxgboost_NA , newdata = DF.NAP.Train.DATA)
+pred_gbm_NA_in <- exp(log.predict_Na_in)
+results_in<- data.frame(actual =  DF.NAP.Train[,1], prediction =pred_gbm_NA_in )
+head(results_in)
+
+MAPE(pred_gbm_NA_in, DF.NAP.Train[,1])
+errors = abs(pred_gbm_NA_in- DF.NAP.Train[,1])
+median(errors)
+
+
