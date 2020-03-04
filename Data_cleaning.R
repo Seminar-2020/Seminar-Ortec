@@ -86,15 +86,15 @@ DF.dum.nap.train_1 = DF.dum.nap.train[sample_nap, ]
 DF.dum.nap.train_2 = DF.dum.nap.train[-sample_nap,]
 DF.dum.nap.test <- DF.dum.nap[7609:8756,] #all houses sold in 18
 
-DF.dum.nap.train_2 = DF.dum.nap.train_2[,-c(5,7,8,12,13,17,19,20,21,25)]
-DF.dum.nap.test = DF.dum.nap.test[,-c(5,7,8,12,13,17,19,20,21,25)]
-DF.dum.ap.train_2 = DF.dum.ap.train_2[,-c(3,5,11, 12, 13, 14,17,20,24,25)]
-DF.dum.ap.test = DF.dum.ap.test[,-c(3,5,11, 12, 13, 14,17,20,24,25)]
+DF.NAP.Train = DF.dum.nap.train_2[,-c(5,7,8,12,13,17,19,20,21,25)]
+DF.NAP.Test = DF.dum.nap.test[,-c(5,7,8,12,13,17,19,20,21,25)]
+DF.AP.Train = DF.dum.ap.train_2[,-c(3,5,11, 12, 13, 14,17,20,24,25)]
+DF.AP.Test = DF.dum.ap.test[,-c(3,5,11, 12, 13, 14,17,20,24,25)]
 
-names(DF.dum.nap.train_2) = c("Price","House_ID", "SurfLot", "Surface", "Garage", "Datescount", "Age", "Housetype_semi", "Housetype_det", "Neighbourhood_15", "Neighbourhood_06", "Neighbourhood_12" , "Neighbourhood_08", "Neighbourhood_05",  "Neighbourhood_04" )
-names(DF.dum.nap.test)= c("Price","House_ID", "SurfLot", "Surface", "Garage", "Datescount", "Age", "Housetype_semi", "Housetype_det", "Neighbourhood_15", "Neighbourhood_06", "Neighbourhood_12" , "Neighbourhood_08", "Neighbourhood_05",  "Neighbourhood_04" )
-names(DF.dum.ap.train_2) = c("Price","House_ID",  "Surface", "Garage", "Storage", "Monument", "Datescount", "Age", "Neighbourhood_15", "Neighbourhood_06", "Neighbourhood_12" , "Neighbourhood_14", "Neighbourhood_01",  "Neighbourhood_08",  "Neighbourhood_05" )
-names(DF.dum.ap.test)= c("Price", "House_ID", "Surface", "Garage", "Storage", "Monument", "Datescount", "Age", "Neighbourhood_15", "Neighbourhood_06", "Neighbourhood_12" , "Neighbourhood_14", "Neighbourhood_01",  "Neighbourhood_08" ,  "Neighbourhood_05")
+names(DF.NAP.Train) = c("Price","House_ID", "SurfLot", "Surface", "Garage", "Datescount", "Age", "Housetype_semi", "Housetype_det", "Neighbourhood_15", "Neighbourhood_06", "Neighbourhood_12" , "Neighbourhood_08", "Neighbourhood_05",  "Neighbourhood_04" )
+names(DF.NAP.Test)= c("Price","House_ID", "SurfLot", "Surface", "Garage", "Datescount", "Age", "Housetype_semi", "Housetype_det", "Neighbourhood_15", "Neighbourhood_06", "Neighbourhood_12" , "Neighbourhood_08", "Neighbourhood_05",  "Neighbourhood_04" )
+names(DF.AP.Train) = c("Price","House_ID",  "Surface", "Garage", "Storage", "Monument", "Datescount", "Age", "Neighbourhood_15", "Neighbourhood_06", "Neighbourhood_12" , "Neighbourhood_14", "Neighbourhood_01",  "Neighbourhood_08",  "Neighbourhood_05" )
+names(DF.AP.Test)= c("Price", "House_ID", "Surface", "Garage", "Storage", "Monument", "Datescount", "Age", "Neighbourhood_15", "Neighbourhood_06", "Neighbourhood_12" , "Neighbourhood_14", "Neighbourhood_01",  "Neighbourhood_08" ,  "Neighbourhood_05")
 
-rm("dataset", "dates", "DF", "DF.dum", "DF.dum.ap", "DF.dum.ap.train_1","DF.dum.ap.train", "DF.dum.nap.train","DF.dum.nap", "DF.dum.nap.train_1","DF.use","split", "age", "datescount", "length_ap", "length_nap", "sample_ap", "sample_nap" )
-
+rm("dataset", "dates", "DF", "DF.dum", "DF.dum.ap", "DF.dum.ap.train_1","DF.dum.ap.train", "DF.dum.nap.train","DF.dum.nap", "DF.dum.nap.train_1","DF.use","split", "age", "datescount", "length_ap", "length_nap", "sample_ap", "sample_nap", "DF.dum.ap.test","DF.dum.ap.train_2","DF.dum.nap.test","DF.dum.nap.train_2")
+# only keep DF.NAP.Train, DF.NAP.Test, DF.AP.Train, DF.AP.Test
