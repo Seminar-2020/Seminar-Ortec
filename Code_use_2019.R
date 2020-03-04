@@ -3,6 +3,9 @@
 lm_ap_fin = lm(log(WAARDE)~ datescount+WONINGOPP+I(WONINGOPP^2) + GARAGE + BERGING + MONUMENT + AGE+ I(AGE^2)+ BUURTCODE_08 + BUURTCODE_14 + BUURTCODE_06 + BUURTCODE_05 + BUURTCODE_12 + BUURTCODE_15 + BUURTCODE_01 , DF.dum.ap.train_2)
 log.pred_ols <- predict(lm_ap_fin,DF.AP.Test)
 pred_ols <- exp(log.pred_ols)
+ 
+check <- cbind(pred_ols, DF.AP.Test)
+head()
 
 # Metrics  out - sample
 errors = abs(pred_ols - DF.AP.Test[,1])
@@ -167,8 +170,7 @@ xgboost_2<- xgboost( data = DF.AP.Train.DATA , label =DF.AP.Train.LABEL, nrounds
 
 # same results indepent of the seed 
 #Evaluations out of sample
-log.predict_1 = predict(xgboost_1, newdata = DF.AP.Test.DATA)
-log.predict_2= predict(xgboost_1, newdata = DF.AP.Test.DATA)
+log.predict_1 = predict(xxgboost_1, newdata = DF.AP.Test.DATA)
 pred_gbm_1 <- exp(log.predict_1 )
 pred_gbm_2 <-  exp(log.predict_2)
 results_1_GBM <- data.frame(actual =  DF.AP.Test[,1], prediction.GBM =pred_gbm_1 )
